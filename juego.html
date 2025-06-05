@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Héroes Hídricos: La Batalla por el Planeta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos básicos para la página del juego */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e0f2f7; /* Azul claro para un tema de agua */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #00796b; /* Verde azulado */
+            margin-bottom: 25px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #004d40; /* Verde oscuro */
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .player-scores {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .player-score-card {
+            background-color: #f0f4c3; /* Amarillo claro para destacar */
+            border: 2px solid #cddc39;
+            border-radius: 8px;
+            padding: 15px 25px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .player-score-card h3 {
+            color: #689f38; /* Verde */
+            margin-top: 0;
+            font-size: 1.4em;
+        }
+
+        .score {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #33691e; /* Verde oscuro */
+        }
+
+        .scenario-box {
+            background-color: #e8f5e9; /* Verde muy claro */
+            border: 1px solid #a5d6a7;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .scenario-box p {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1b5e20; /* Verde muy oscuro */
+            margin-bottom: 20px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options-list li {
+            background-color: #c8e6c9; /* Verde claro */
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .options-list li:hover {
+            background-color: #a5d6a7; /* Verde medio */
+        }
+
+        .option-text {
+            flex-grow: 1;
+            font-size: 1.1em;
+        }
+
+        .option-impact {
+            font-size: 0.9em;
+            color: #4caf50; /* Verde medio */
+            font-weight: bold;
+            margin-left: 15px;
+            white-space: nowrap; /* Evita que el impacto se rompa en varias líneas */
+        }
+
+        button {
+            background-color: #26a69a; /* Turquesa */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #00897b; /* Turquesa más oscuro */
+        }
+
+        .game-messages {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #d32f2f; /* Rojo para mensajes de error o alerta */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Héroes Hídricos: La Batalla por el Planeta</h1>
+
+        <div class="player-scores">
+            <div class="player-score-card">
+                <h3>Jugador 1</h3>
+                <p>Huella Hídrica Total: <span id="player1-water-score" class="score">0 L</span></p>
+                <p>Residuos Totales: <span id="player1-waste-score" class="score">0 g</span></p>
+            </div>
+            <div class="player-score-card">
+                <h3>Jugador 2</h3>
+                <p>Huella Hídrica Total: <span id="player2-water-score" class="score">0 L</span></p>
+                <p>Residuos Totales: <span id="player2-waste-score" class="score">0 g</span></p>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <h2>Ronda <span id="round-number">1</span>: ¡Toma una decisión!</h2>
+
+            <div class="scenario-box" id="current-scenario">
+                <p>Escenario: Te duchas por la mañana.</p>
+                <ul class="options-list">
+                    <li data-water="150" data-waste="0">
+                        <span class="option-text">Ducha larga (10 minutos)</span>
+                        <span class="option-impact">Impacto: 150 L, 0g Residuos</span>
+                    </li>
+                    <li data-water="75" data-waste="0">
+                        <span class="option-text">Ducha corta (5 minutos)</span>
+                        <span class="option-impact">Impacto: 75 L, 0g Residuos</span>
+                    </li>
+                    <li data-water="50" data-waste="0">
+                        <span class="option-text">Cierras el grifo al enjabonarte</span>
+                        <span class="option-impact">Impacto: 50 L, 0g Residuos</span>
+                    </li>
+                </ul>
+            </div>
+
+            <button id="next-round-button">Siguiente Ronda</button>
+            <div id="game-messages" class="game-messages"></div>
+        </div>
+
+        <div id="game-over-screen" style="display:none;">
+            <h2>¡Juego Terminado!</h2>
+            <p id="winner-message" style="font-size: 1.5em; font-weight: bold;"></p>
+            <button onclick="location.reload()">Jugar de Nuevo</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Lógica del Juego (JavaScript) ---
+        // Esto es un punto de partida. Necesitarás ampliarlo para un juego completo.
+
+        const player1WaterScoreSpan = document.getElementById('player1-water-score');
+        const player1WasteScoreSpan = document.getElementById('player1-waste-score');
+        const player2WaterScoreSpan = document.getElementById('player2-water-score');
+        const player2WasteScoreSpan = document.getElementById('player2-waste-score');
+        const roundNumberSpan = document.getElementById('round-number');
+        const currentScenarioDiv = document.getElementById('current-scenario');
+        const optionsList = currentScenarioDiv.querySelector('.options-list');
+        const nextRoundButton = document.getElementById('next-round-button');
+        const gameMessagesDiv = document.getElementById('game-messages');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const winnerMessage = document.getElementById('winner-message');
+        const gameArea = document.getElementById('game-area');
+
+        let player1Score = { water: 0, waste: 0 };
+        let player2Score = { water: 0, waste: 0 };
+        let currentRound = 1;
+        const maxRounds = 3; // Puedes ajustar el número de rondas
+        let player1Choice = null;
+        let player2Choice = null;
+        let currentPlayerTurn = 1; // 1 para Jugador 1, 2 para Jugador 2
+
+        // Define tus escenarios y sus opciones
+        const scenarios = [
+            {
+                scenario: "Te duchas por la mañana.",
+                options: [
+                    { text: "Ducha larga (10 minutos)", water: 150, waste: 0 },
+                    { text: "Ducha corta (5 minutos)", water: 75, waste: 0 },
+                    { text: "Cierras el grifo al enjabonarte", water: 50, waste: 0 }
+                ]
+            },
+            {
+                scenario: "Preparas la cena para tu familia.",
+                options: [
+                    { text: "Cocinas carne (alta huella hídrica)", water: 4000, waste: 300 },
+                    { text: "Cocinas comida vegetariana", water: 500, waste: 100 },
+                    { text: "Usas productos locales y de temporada", water: 300, waste: 50 }
+                ]
+            },
+            {
+                scenario: "Necesitas una bebida refrescante.",
+                options: [
+                    { text: "Compras una botella de agua embotellada", water: 3, waste: 20 }, // 3L para producir la botella
+                    { text: "Bebes agua del grifo en una botella reutilizable", water: 0, waste: 0 },
+                    { text: "Compras una lata de refresco", water: 200, waste: 15 } // Incluye agua de producción
+                ]
+            },
+            {
+                scenario: "Se te rompe una prenda de ropa.",
+                options: [
+                    { text: "Compras una prenda nueva", water: 2700, waste: 200 },
+                    { text: "Compras una prenda de segunda mano", water: 0, waste: 0 },
+                    { text: "Reparas la prenda rota", water: 0, waste: 0 }
+                ]
+            }
+        ];
+
+        let currentScenarioIndex = 0; // Índice del escenario actual
+
+        function updateScoresDisplay() {
+            player1WaterScoreSpan.textContent = `${player1Score.water} L`;
+            player1WasteScoreSpan.textContent = `${player1Score.waste} g`;
+            player2WaterScoreSpan.textContent = `${player2Score.water} L`;
+            player2WasteScoreSpan.textContent = `${player2Score.waste} g`;
+        }
+
+        function displayScenario() {
+            if (currentScenarioIndex >= scenarios.length || currentRound > maxRounds) {
+                endGame();
+                return;
+            }
+
+            const scenarioData = scenarios[currentScenarioIndex];
+            currentScenarioDiv.querySelector('p').textContent = `Escenario: ${scenarioData.scenario}`;
+            optionsList.innerHTML = ''; // Limpiar opciones anteriores
+
+            scenarioData.options.forEach((option, index) => {
+                const li = document.createElement('li');
+                li.dataset.water = option.water;
+                li.dataset.waste = option.waste;
+                li.dataset.optionIndex = index; // Para identificar la opción
+
+                const optionTextSpan = document.createElement('span');
+                optionTextSpan.className = 'option-text';
+                optionTextSpan.textContent = option.text;
+
+                const optionImpactSpan = document.createElement('span');
+                optionImpactSpan.className = 'option-impact';
+                optionImpactSpan.textContent = `Impacto: ${option.water} L, ${option.waste}g Residuos`;
+
+                li.appendChild(optionTextSpan);
+                li.appendChild(optionImpactSpan);
+                optionsList.appendChild(li);
+
+                li.addEventListener('click', () => selectOption(li));
+            });
+
+            gameMessagesDiv.textContent = `¡Turno del Jugador ${currentPlayerTurn}! Selecciona tu acción.`;
+            nextRoundButton.style.display = 'none'; // Ocultar el botón hasta que ambos elijan
+            player1Choice = null;
+            player2Choice = null;
+            optionsList.querySelectorAll('li').forEach(li => li.classList.remove('selected')); // Desseleccionar
+        }
+
+        function selectOption(selectedLi) {
+            const waterImpact = parseInt(selectedLi.dataset.water);
+            const wasteImpact = parseInt(selectedLi.dataset.waste);
+
+            // Resaltar la opción seleccionada
+            optionsList.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
+            selectedLi.classList.add('selected');
+
+            if (currentPlayerTurn === 1) {
+                player1Choice = { water: waterImpact, waste: wasteImpact };
+                gameMessagesDiv.textContent = "Jugador 1 ha elegido. ¡Turno del Jugador 2!";
+                currentPlayerTurn = 2; // Pasar el turno al Jugador 2
+            } else {
+                player2Choice = { water: waterImpact, waste: wasteImpact };
+                gameMessagesDiv.textContent = "Jugador 2 ha elegido. ¡Ambos han seleccionado!";
+                // Ambos han elegido, mostrar el botón de siguiente ronda
+                nextRoundButton.style.display = 'block';
+            }
+        }
+
+        function processRound() {
+            if (player1Choice && player2Choice) {
+                player1Score.water += player1Choice.water;
+                player1Score.waste += player1Choice.waste;
+
+                player2Score.water += player2Choice.water;
+                player2Score.waste += player2Choice.waste;
+
+                updateScoresDisplay();
+                currentRound++;
+                roundNumberSpan.textContent = currentRound;
+                currentScenarioIndex++; // Pasar al siguiente escenario
+
+                // Reiniciar para la siguiente ronda
+                player1Choice = null;
+                player2Choice = null;
+                currentPlayerTurn = 1; // Siempre empieza el Jugador 1 la siguiente ronda
+
+                if (currentRound <= maxRounds && currentScenarioIndex < scenarios.length) {
+                    displayScenario();
+                } else {
+                    endGame();
+                }
+            } else {
+                gameMessagesDiv.textContent = "Ambos jugadores deben seleccionar una opción antes de avanzar.";
+            }
+        }
+
+        function endGame() {
+            gameArea.style.display = 'none';
+            gameOverScreen.style.display = 'block';
+
+            let winner = '';
+            // El objetivo es tener la menor huella. Combinamos agua y residuos para una puntuación total.
+            // Podrías ponderar estos valores si quieres dar más importancia a uno.
+            const player1TotalImpact = player1Score.water + (player1Score.waste * 10); // Ejemplo: 1g de residuo = 10L de agua
+            const player2TotalImpact = player2Score.water + (player2Score.waste * 10);
+
+            if (player1TotalImpact < player2TotalImpact) {
+                winner = '¡El Jugador 1 es el Héroe Hídrico!';
+                winnerMessage.style.color = '#33691e'; // Verde
+            } else if (player2TotalImpact < player1TotalImpact) {
+                winner = '¡El Jugador 2 es el Héroe Hídrico!';
+                winnerMessage.style.color = '#33691e'; // Verde
+            } else {
+                winner = '¡Es un empate! Ambos son Héroes Hídricos.';
+                winnerMessage.style.color = '#004d40'; // Verde oscuro
+            }
+            winnerMessage.textContent = `${winner} \n\nHuella Total Jugador 1: ${player1TotalImpact.toLocaleString()} unidades \nHuella Total Jugador 2: ${player2TotalImpact.toLocaleString()} unidades`;
+        }
+
+        // Inicializar el juego
+        document.addEventListener('DOMContentLoaded', () => {
+            updateScoresDisplay();
+            displayScenario();
+            nextRoundButton.addEventListener('click', processRound);
+        });
+
+    </script>
+</body>
+</html>
